@@ -30,6 +30,9 @@ def getData():
     df = pd.read_csv(url_1)
     records = df.to_dict('records')
 
+    ## The first one is the empty field, so we don't care about that
+    del records[0]
+
     return records
 
 
@@ -37,7 +40,7 @@ def findNameAndPoints(name):
     records = getData()
     for r in records:
         if name == r['name']:
-            return (name, r['points'])
+            return (name, int(r['sum points']))
 
     return None
 
