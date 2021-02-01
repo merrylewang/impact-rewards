@@ -1,4 +1,4 @@
-from flask import Flask, flash, redirect, render_template, request, session, abort, url_for
+from flask import Flask, flash, redirect, render_template, request, session, abort, url_for, jsonify
 import pandas as pd
 
 app = Flask(__name__)
@@ -8,6 +8,17 @@ app = Flask(__name__)
 def home():
     return render_template('home.html')
 
+@app.route('/api/<name>', methods=['GET'])
+def api(name):
+    data = findNameAndPoints(name)
+
+    if data != None:
+        retData = dict()
+        retData['name'] = data[0]
+        retData['points'] = data[1]
+        return jsonify(retData)
+    else:
+        return jsonify({'name':'None','points': 'None'})
 
 @app.route('/points/', methods=['POST', 'GET'])
 def result():
