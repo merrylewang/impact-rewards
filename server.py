@@ -17,27 +17,14 @@ def api(name):
     if data != None:
         retData = dict()
         retData['name'] = data[0]
-        retData['points'] = data[1]
+        retData['totalPoints'] = data[1]
+        retData['mostRecentlyAddedPoints'] = data[2]
         return jsonify(retData)
     else:
-        return jsonify({'name':'None','points': 'None'})
+        return jsonify({'name':'None','points': 'None', 'mostRecentlyAddedPoints': 'None'})
 
-@app.route('/points/', methods=['POST', 'GET'])
-def result():
-    if request.method == 'POST':
-        name = request.form['Name']
-        data = findNameAndPoints(name)
-
-        if data != None:
-            return render_template('points.html', name=data[0], points=data[1])
-        else:
-            return "name not found"
-
-    else:
-        return redirect(url_for('home'))
-
-
-def getData():
+def getTotalPoints(name):
+    # second sheet on the google sheet
     sheet_url = "https://docs.google.com/spreadsheets/d/1t-W9RcsgEuTvNbwB9dRMfoMKjoN8kyJFJeLcHfiO8rs/edit#gid=0"
     url_1 = sheet_url.replace('/edit#gid=', '/export?format=csv&gid=')
     df = pd.read_csv(url_1)
@@ -46,17 +33,33 @@ def getData():
     ## The first one is the empty field, so we don't care about that
     del records[0]
 
-    return records
-
-
-def findNameAndPoints(name):
-    records = getData()
     for r in records:
         if name == r['name']:
-            return (name, int(r['sum points']))
+            return int(r['sum points'])
 
     return None
 
+def getMostRecentAddedPoints(name):
+    ## third sheet on the google sheet
+    sheet_url = "https://docs.google.com/spreadsheets/d/1t-W9RcsgEuTvNbwB9dRMfoMKjoN8kyJFJeLcHfiO8rs/edit#gid=1159651787"
+    url_1 = sheet_url.replace('/edit#gid=', '/export?format=csv&gid=')
+    df = pd.read_csv(url_1)
+    records = df.to_dict('records')
+
+    for r in records:
+        if name == r['name']:
+            return int(r['points'])
+
+    return None
+
+def findNameAndPoints(name):
+    total = getTotalPoints(name)
+    recentAdd = getMostRecentAddedPoints(name)
+
+    if total != None and recentAdd != None:
+        return (name, total, recentAdd)
+
+    return None
 
 if __name__ == '__main__':
     app.run()
