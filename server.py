@@ -20,11 +20,12 @@ def api(email):
     if data != None:
         retData = dict()
         retData['name'] = data[0]
-        retData['totalPoints'] = data[1]
-        retData['mostRecentlyAddedPoints'] = data[2]
+        retData['email'] = data[1]
+        retData['totalPoints'] = data[2]
+        retData['mostRecentlyAddedPoints'] = data[3]
         return jsonify(retData)
     else:
-        return jsonify({'name':'None','points': 'None', 'mostRecentlyAddedPoints': 'None'})
+        return jsonify({'name':'None','email':'None', 'points': 'None', 'mostRecentlyAddedPoints': 'None'})
 
 def getTotalPointsAndName(email):
     # second sheet on the google sheet
@@ -32,17 +33,20 @@ def getTotalPointsAndName(email):
     url_1 = sheet_url.replace('/edit#gid=', '/export?format=csv&gid=')
     df = pd.read_csv(url_1)
     records = df.to_dict('records')
-
-
+    print(records)
     ## The first one is the empty field, so we don't care about that
     del records[0]
 
+    def clean_records(records):
+        """Helper function to clean the keys"""
+        return [{k.strip(): v for (k, v) in record.items()} for record in records]
+    records = clean_records(records)
+
     for r in records:
-        print(r)
-        if email == r['name']:
+        if email == r['email']:
             return (r['name'], int(r['sum points']))
 
-    return None
+    return (None, None)
 
 def getMostRecentAddedPoints(email):
     ## third sheet on the google sheet
@@ -63,7 +67,7 @@ def findNameAndPoints(email):
     recentAdd = getMostRecentAddedPoints(email)
 
     if total != None and recentAdd != None:
-        return (name, total, recentAdd)
+        return (name, email, total, recentAdd)
 
     return None
 
