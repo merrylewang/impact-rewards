@@ -29,10 +29,13 @@ def getTotalPoints(name):
     url_1 = sheet_url.replace('/edit#gid=', '/export?format=csv&gid=')
     df = pd.read_csv(url_1)
     records = df.to_dict('records')
-
     ## The first one is the empty field, so we don't care about that
     del records[0]
 
+    def clean_records(records):
+        """Helper function to clean the keys"""
+        return [{k.strip(): v for (k, v) in record.items()} for record in records]
+    records = clean_records(records)
     for r in records:
         if name == r['name']:
             return int(r['sum points'])
