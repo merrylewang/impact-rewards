@@ -13,9 +13,9 @@ def home():
     return render_template('home.html')
 
 # going REST api approach to give data to John's react app
-@app.route('/api/<name>', methods=['GET'])
-def api(name):
-    data = findNameAndPoints(name)
+@app.route('/api/<email>', methods=['GET'])
+def api(email):
+    data = findNameAndPoints(email)
 
     if data != None:
         retData = dict()
@@ -26,23 +26,25 @@ def api(name):
     else:
         return jsonify({'name':'None','points': 'None', 'mostRecentlyAddedPoints': 'None'})
 
-def getTotalPoints(name):
+def getTotalPointsAndName(email):
     # second sheet on the google sheet
     sheet_url = TOTAL_POINTS_SHEET
     url_1 = sheet_url.replace('/edit#gid=', '/export?format=csv&gid=')
     df = pd.read_csv(url_1)
     records = df.to_dict('records')
 
+
     ## The first one is the empty field, so we don't care about that
     del records[0]
 
     for r in records:
-        if name == r['name']:
-            return int(r['sum points'])
+        print(r)
+        if email == r['name']:
+            return (r['name'], int(r['sum points']))
 
     return None
 
-def getMostRecentAddedPoints(name):
+def getMostRecentAddedPoints(email):
     ## third sheet on the google sheet
     sheet_url = RECENT_POINTS_SHEET
     url_1 = sheet_url.replace('/edit#gid=', '/export?format=csv&gid=')
@@ -50,14 +52,15 @@ def getMostRecentAddedPoints(name):
     records = df.to_dict('records')
 
     for r in records:
-        if name == r['name']:
+        if email == r['email']:
             return int(r['points'])
 
     return None
 
-def findNameAndPoints(name):
-    total = getTotalPoints(name)
-    recentAdd = getMostRecentAddedPoints(name)
+
+def findNameAndPoints(email):
+    name, total = getTotalPointsAndName(email)
+    recentAdd = getMostRecentAddedPoints(email)
 
     if total != None and recentAdd != None:
         return (name, total, recentAdd)
