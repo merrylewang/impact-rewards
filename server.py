@@ -5,6 +5,9 @@ import pandas as pd
 app = Flask(__name__)
 CORS(app)
 
+TOTAL_POINTS_SHEET = "https://docs.google.com/spreadsheets/d/1t-W9RcsgEuTvNbwB9dRMfoMKjoN8kyJFJeLcHfiO8rs/edit#gid=0"
+RECENT_POINTS_SHEET = "https://docs.google.com/spreadsheets/d/1t-W9RcsgEuTvNbwB9dRMfoMKjoN8kyJFJeLcHfiO8rs/edit#gid=1159651787"
+
 @app.route('/')
 def home():
     return render_template('home.html')
@@ -25,7 +28,7 @@ def api(name):
 
 def getTotalPoints(name):
     # second sheet on the google sheet
-    sheet_url = "https://docs.google.com/spreadsheets/d/1t-W9RcsgEuTvNbwB9dRMfoMKjoN8kyJFJeLcHfiO8rs/edit#gid=0"
+    sheet_url = TOTAL_POINTS_SHEET
     url_1 = sheet_url.replace('/edit#gid=', '/export?format=csv&gid=')
     df = pd.read_csv(url_1)
     records = df.to_dict('records')
@@ -44,7 +47,7 @@ def getTotalPoints(name):
 
 def getMostRecentAddedPoints(name):
     ## third sheet on the google sheet
-    sheet_url = "https://docs.google.com/spreadsheets/d/1t-W9RcsgEuTvNbwB9dRMfoMKjoN8kyJFJeLcHfiO8rs/edit#gid=1159651787"
+    sheet_url = RECENT_POINTS_SHEET
     url_1 = sheet_url.replace('/edit#gid=', '/export?format=csv&gid=')
     df = pd.read_csv(url_1)
     records = df.to_dict('records')
