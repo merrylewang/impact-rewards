@@ -27,21 +27,19 @@ def api(email):
     else:
         return jsonify({'name':'None','email':'None', 'points': 'None', 'mostRecentlyAddedPoints': 'None'})
 
+def clean_records(records):
+    """Helper function to clean the keys"""
+    return [{k.strip(): v for (k, v) in record.items()} for record in records]
+
 def getTotalPointsAndName(email):
     # second sheet on the google sheet
     sheet_url = TOTAL_POINTS_SHEET
     url_1 = sheet_url.replace('/edit#gid=', '/export?format=csv&gid=')
     df = pd.read_csv(url_1)
     records = df.to_dict('records')
-    print(records)
+    records = clean_records(records)
     ## The first one is the empty field, so we don't care about that
     del records[0]
-
-    def clean_records(records):
-        """Helper function to clean the keys"""
-        return [{k.strip(): v for (k, v) in record.items()} for record in records]
-    records = clean_records(records)
-
     for r in records:
         if email == r['email']:
             return (r['name'], int(r['sum points']))
@@ -54,7 +52,7 @@ def getMostRecentAddedPoints(email):
     url_1 = sheet_url.replace('/edit#gid=', '/export?format=csv&gid=')
     df = pd.read_csv(url_1)
     records = df.to_dict('records')
-
+    records = clean_records(records)
     for r in records:
         if email == r['email']:
             return int(r['points'])
